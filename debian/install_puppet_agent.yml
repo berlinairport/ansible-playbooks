@@ -1,0 +1,60 @@
+# vim:set tabstop=2 softtabstop=2 shiftwidth=2 expandtab:
+---
+- hosts: debian
+  user: root
+
+  tasks:
+
+    - name: "puppet setup | apt update cache"
+      action: apt update_cache=yes
+      when: ('puppetmaster' not in group_names) and (ansible_distribution == "Debian" and ansible_distribution_release == "jessie")
+
+    - name: "puppet setup | apt install package"
+      action: apt name={{ item }} state=present
+      with_items:
+      - puppet
+      when: ('puppetmaster' not in group_names) and (ansible_distribution == "Debian" and ansible_distribution_release == "jessie")
+
+
+    - name: "puppet setup | clean up config file"
+      file: path=/etc/puppet/puppet.conf state=absent
+      when: ('puppetmaster' not in group_names) and (ansible_distribution == "Debian" and ansible_distribution_release == "jessie")
+
+    - name: "puppet setup | create config file"
+      file: path=/etc/puppet/puppet.conf state=touch owner=root group=root mode=0644
+      when: ('puppetmaster' not in group_names) and (ansible_distribution == "Debian" and ansible_distribution_release == "jessie")
+
+    - name: "puppet setup | update config file"
+      blockinfile:
+        dest: /etc/puppet/puppet.conf
+        block: |
+          # file handled by ansible, last update: {{ansible_date_time.epoch}}
+          [main]
+          server=puppetma0.mydomain.tld
+          runinterval=30m
+          logdir=/var/log/puppet
+          vardir=/var/lib/puppet
+          ssldir=/var/lib/puppet/ssl
+          rundir=/var/run/puppet
+          factpath=$vardir/lib/facter
+
+          [master]
+          # These are needed when the puppetmaster is run by passenger
+          # and can safely be removed if webrick is used.
+          ssl_client_header = SSL_CLIENT_S_DN
+          ssl_client_verify_header = SSL_CLIENT_VERIFY
+      when: ('puppetmaster' not in group_names) and (ansible_distribution == "Debian" and ansible_distribution_release == "jessie")
+      notify: ensure puppet is running
+
+    - name:  "puppet setup | puppet enable"
+      command: /usr/bin/puppet agent --enable
+      when: ('puppetmaster' not in group_names) and (ansible_distribution == "Debian" and ansible_distribution_release == "jessie")
+
+    - name: "puppet setup | start puppet"
+      command: /usr/bin/puppet agent -t
+      ignore_errors: yes
+      when: ('puppetmaster' not in group_names) and (ansible_distribution == "Debian" and ansible_distribution_release == "jessie")
+
+    - name: "puppet setup | ensure puppet is running"
+      command: /usr/bin/puppet resource service puppet ensure=running enable=true
+      when: ('puppetmaster' not in group_names) and (ansible_distribution == "Debian" and ansible_distribution_release == "jessie")
