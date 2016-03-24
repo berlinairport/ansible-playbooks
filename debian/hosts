@@ -1,0 +1,17 @@
+[debian]
+apt:22 ansible_ssh_user=root                 # Debian APT Mirror
+dev:22 ansible_ssh_user=root                 # Development Server
+repo:22 ansible_ssh_user=root                # mercurial/hg Repository Server
+wiki:22 ansible_ssh_user=root                # Wikimedia Server
+ansible:22 ansible_ssh_user=root             # Remote Execution Server
+puppetma1:22 ansible_ssh_user=root           # Puppet Master Linux PRD/TST
+puppetma2:22 ansible_ssh_user=root           # Puppet Master Windows PRD/TST
+
+[puppetmaster]
+puppetma1:22 ansible_ssh_user=root           # Puppet Master Linux PRD/TST
+puppetma2:22 ansible_ssh_user=root           # Puppet Master Windows PRD/TST
+
+[debiantest]
+test1:22 ansible_ssh_user=root               # Test1 Server
+test2:22 ansible_ssh_user=root               # Test2 Server
+puppettest:22 ansible_ssh_user=root          # Puppet Master Test
