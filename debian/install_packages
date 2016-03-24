@@ -1,0 +1,35 @@
+# vim:set tabstop=2 softtabstop=2 shiftwidth=2 expandtab:
+---
+- hosts: debian
+  user: root
+
+  tasks:
+    - name: "apt | update"
+      action: apt update_cache=yes
+
+    - name: "apt | install standard packages"
+      action: apt name={{ item }} state=present
+      with_items:
+        - python-software-properties
+        - python-apt
+        - check-mk-agent
+        - xinetd
+        - nmap
+        - lsof
+        - findutils
+        - multitail
+        - sudo
+        - vim
+        - vim-nox
+        - mc
+        - mercurial
+        - tcpdump
+        - iftop
+        - iotop
+        - rsync
+        - sysstat
+        - procps
+        - strace
+        - apt-file
+        - iproute
+        - python-pip
