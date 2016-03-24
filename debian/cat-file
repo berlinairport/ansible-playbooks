@@ -1,0 +1,12 @@
+# vim:set tabstop=2 softtabstop=2 shiftwidth=2 expandtab:
+---
+- hosts: debian
+  user: root
+
+  tasks:
+
+    - name: "get debian version"
+      shell: cat /etc/debian_version
+      register: result_version
+
+    - debug: var=result_version.stdout
