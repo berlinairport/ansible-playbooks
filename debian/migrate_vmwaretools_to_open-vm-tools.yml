@@ -1,0 +1,26 @@
+# vim:set tabstop=2 softtabstop=2 shiftwidth=2 expandtab:
+---
+- hosts: debian
+  user: root
+
+  tasks:
+
+    - name: debian update
+      action: apt update_cache=yes
+
+    - stat: path=/etc/vmware-tools/installer.sh
+      register: vmware_uninstaller
+
+    - name: uninstall vmware tools
+      command: /etc/vmware-tools/installer.sh uninstall
+      when: vmware_uninstaller.stat.exists is defined and vmware_uninstaller.stat.exists
+
+    - name: apt install open-vm-tools
+      action: apt name={{ item }} state=present
+      with_items:
+      - open-vm-tools
+      register: result
+
+    - name: reboot
+      command: /sbin/reboot
+      when: result.changed
