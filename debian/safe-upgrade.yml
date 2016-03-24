@@ -1,0 +1,12 @@
+# vim:set tabstop=2 softtabstop=2 shiftwidth=2 expandtab:
+---
+- hosts: debian
+  user: root
+
+  tasks:
+
+    - name: apt | update
+      action: apt update_cache=yes
+
+    - name: apt | upgrade
+      action: apt upgrade=safe force=yes
