@@ -1,0 +1,68 @@
+# vim:set tabstop=2 softtabstop=2 shiftwidth=2 expandtab:
+---
+- hosts: all
+  user: root
+
+  tasks:
+
+    - name: Add APT Proxy (Debian Mirror)
+      lineinfile:
+        dest=/etc/apt/apt.conf.d/70debconf
+        state=present
+        line="{{item}}"
+      with_items:
+        - 'DPkg::Pre-Install-Pkgs {"/usr/sbin/dpkg-preconfigure --apt || true";};'
+        - 'Acquire::http { Proxy "http://apt:3142"; };'
+
+    - name: "apt | delete sources.list"
+      file: path=/etc/apt/sources.list state=absent
+
+    - name: "apt | create sources.list"
+      file: path=/etc/apt/sources.list state=touch owner=root group=root mode=0644
+
+    - name: Add APT Sources into sources.list Jessie
+      lineinfile:
+        dest=/etc/apt/sources.list
+        state=present
+        line="{{item}}"
+      with_items:
+        - "deb http://ftp.de.debian.org/debian/ jessie main contrib non-free"
+        - "deb-src http://ftp.de.debian.org/debian/ jessie main contrib non-free"
+        - "deb http://security.debian.org/ jessie/updates main contrib non-free"
+        - "deb-src http://security.debian.org/ jessie/updates main contrib non-free"
+        - "deb http://ftp2.de.debian.org/debian/ jessie-updates main"
+        - "deb http://apt/debian/ mydebs/"
+        - "deb-src http://ftp2.de.debian.org/debian/ jessie-updates main"
+        - "deb http://http.debian.net/debian jessie-backports main"
+        - "deb http://ftp.debian.org/debian jessie-backports main contrib non-free"
+        - "# deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main"
+        - "# deb http://apt.puppetlabs.com jessie main"
+        - "# deb http://apt.puppetlabs.com jessie dependencies"
+        - "# deb-src http://apt.puppetlabs.com jessie dependencies"
+        - "# deb http://releases.wikimedia.org/debian jessie-mediawiki main"
+      when: (ansible_distribution == "Debian" and ansible_distribution_release == "jessie")
+
+    - name: Add APT Sources into sources.list Wheezy
+      lineinfile:
+        dest=/etc/apt/sources.list
+        state=present
+        line="{{item}}"
+      with_items:
+        - "deb http://ftp.de.debian.org/debian/ wheezy main contrib non-free"
+        - "deb-src http://ftp.de.debian.org/debian/ wheezy main contrib non-free"
+        - "deb http://security.debian.org/ wheezy/updates main contrib non-free"
+        - "deb-src http://security.debian.org/ wheezy/updates main contrib non-free"
+        - "deb http://ftp2.de.debian.org/debian/ wheezy-updates main"
+        - "deb http://apt/debian/ mydebs/"
+        - "deb-src http://ftp2.de.debian.org/debian/ wheezy-updates main"
+        - "deb http://http.debian.net/debian wheezy-backports main"
+        - "deb http://ftp.debian.org/debian wheezy-backports main contrib non-free"
+        - "# deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main"
+        - "# deb http://apt.puppetlabs.com wheezy main"
+        - "# deb http://apt.puppetlabs.com wheezy dependencies"
+        - "# deb-src http://apt.puppetlabs.com wheezys dependencies"
+        - "# deb http://releases.wikimedia.org/debian wheezy-mediawiki main"
+      when: (ansible_distribution == "Debian" and ansible_distribution_release == "wheezy")
+
+    - name: Download FBB APT Public Key
+      shell: wget -O - -q http://apt/debian/mydebs/Release1.gpg |apt-key add -
